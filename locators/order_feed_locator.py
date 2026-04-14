@@ -13,7 +13,11 @@ COMPLETED_TODAY = (By.XPATH, ".//p[text()='Выполнено за сегодн�
 
 # Раздел "В работе" (список номеров заказов)
 # Замена CSS-селектор на надежный XPath, который ищет в колонке "В работе" (Ready/Pending)
-ORDERS_IN_WORK_LIST = (By.XPATH, ".//ul[contains(@class, 'orderListReady')]//li")
+# Замените в locators/order_feed_locator.py:
+# Локатор именно для списка заказов в колонке "В работе"
+ORDERS_IN_WORK_LIST = (By.XPATH, ".//p[text()='В работе:']/following-sibling::ul//li")
+
+
 
 # Локатор для конкретного номера заказа (динамический, подставлять через f-строку в методе)
 # Пример: f".//li[text()='0{order_number}']"

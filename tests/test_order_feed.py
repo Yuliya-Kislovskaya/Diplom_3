@@ -20,7 +20,7 @@ class TestOrderFeed:
 
         with allure.step('Проверка увеличения счетчика "Выполнено за все время"'):
             feed_page.click_order_feed_button()
-            # Костыль для Firefox: принудительное обновление для синхронизации WebSocket
+            # Обновление страницы помогает Firefox подтянуть актуальный стейт WebSocket
             browser.refresh()
             feed_page.wait_for_counter_to_change('all', initial_count)
             new_count = int(feed_page.get_completed_all_time())
@@ -42,7 +42,6 @@ class TestOrderFeed:
 
         with allure.step('Проверка увеличения счетчика "Выполнено за сегодня"'):
             feed_page.click_order_feed_button()
-            # Костыль для Firefox: принудительное обновление для синхронизации WebSocket
             browser.refresh()
             feed_page.wait_for_counter_to_change('today', initial_count)
             new_count = int(feed_page.get_completed_today())
@@ -59,21 +58,26 @@ class TestOrderFeed:
 
         with allure.step('Переход в ленту и поиск номера в разделе "В работе"'):
             feed_page.click_order_feed_button()
+            
+            # Очищаем созданный номер от ведущих нулей для сравнения
             expected_number = order_number.lstrip('0')
 
+            def check_order_in_list(driver):
+                orders = feed_page.get_at_work_orders()
+                if not orders:
+                    return False
+                # Очищаем от нулей каждый номер из списка ленты и ищем совпадение
+                return any(expected_number == num.lstrip('0') for num in orders)
+
             try:
-                WebDriverWait(browser, 20).until(
-                    lambda d: any(expected_number in num for num in feed_page.get_at_work_orders())
-                )
+                # Первичная попытка дождаться появления номера
+                WebDriverWait(browser, 20).until(check_order_in_list)
             except Exception:
+                # Если не появился — рефрешим страницу (костыль для Firefox) и ждем еще раз
                 browser.refresh()
-                WebDriverWait(browser, 20).until(
-                    lambda d: any(expected_number in num for num in feed_page.get_at_work_orders())
-                )
+                WebDriverWait(browser, 20).until(check_order_in_list)
 
-        assert any(expected_number in num for num in feed_page.get_at_work_orders())
-
-
-
+        # Финальная проверка
+        assert check_order_in_list(browser), f"Заказ {expected_number} не найден в разделе 'В работе'"
 
 

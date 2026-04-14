@@ -12,6 +12,6 @@ __pycache__/
 .pytest_cache/
 .cache/
 
-# Allure результаты и отчеты (чтобы не засорять репозиторий прогонами)
+# Allure результаты 
 allure-results/
-allure-report/
+
