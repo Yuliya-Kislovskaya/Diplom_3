@@ -1,0 +1,17 @@
+# Виртуальное окружение
+venv/
+.env/
+env/
+
+# Кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Кэш Pytest
+.pytest_cache/
+.cache/
+
+# Allure результаты и отчеты (чтобы не засорять репозиторий прогонами)
+allure-results/
+allure-report/

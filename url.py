@@ -1,0 +1,10 @@
+URL = 'https://stellarburgers.education-services.ru/'
+LOGIN = 'login'
+HISTORY = 'account/order-history'
+FORGOT_PASSWORD = 'forgot-password'
+RESET_PASSWORD = 'reset-password'
+FEED = 'feed'
+PROFILE = 'account/profile'
+CREATE_USER = '/api/auth/register'
+DELETE_USER = '/api/auth/user'
+
