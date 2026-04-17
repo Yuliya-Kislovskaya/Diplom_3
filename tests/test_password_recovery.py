@@ -1,11 +1,10 @@
 import allure
-import time
 from url import URL, RESET_PASSWORD, FORGOT_PASSWORD, LOGIN
 
 class TestPasswordRecovery:
 
     @allure.title('Переход на страницу восстановления пароля по кнопке «Восстановить пароль»')
-    def test_password_recovery_page(self, browser, prepare_for_recovery_password):
+    def test_password_recovery_page(self, prepare_for_recovery_password):
         recovery_page = prepare_for_recovery_password
         with allure.step('Открываем страницу авторизации'):
             recovery_page.open(f'{URL}{LOGIN}')
@@ -16,7 +15,7 @@ class TestPasswordRecovery:
             assert recovery_page.get_current_url() == f'{URL}{FORGOT_PASSWORD}'
 
     @allure.title('Ввод почты и клик по кнопке «Восстановить»')
-    def test_password_reset_email_submission(self, browser, prepare_for_recovery_password):
+    def test_password_reset_email_submission(self, prepare_for_recovery_password):
         recovery_page = prepare_for_recovery_password
         with allure.step('Открываем страницу восстановления'):
             recovery_page.open(f'{URL}{FORGOT_PASSWORD}')
@@ -29,7 +28,7 @@ class TestPasswordRecovery:
             assert recovery_page.get_current_url() == f'{URL}{RESET_PASSWORD}'
 
     @allure.title('Клик по кнопке показать/скрыть пароль делает поле активным')
-    def test_show_activates_password_field(self, browser, prepare_for_recovery_password):
+    def test_show_activates_password_field(self, prepare_for_recovery_password):
         recovery_page = prepare_for_recovery_password
         
         with allure.step('Проходим этап ввода email для доступа к reset-password'):
@@ -43,6 +42,7 @@ class TestPasswordRecovery:
 
         with allure.step('Проверяем, что поле пароля стало активным'):
             assert recovery_page.is_password_field_active()
+
 
 
 

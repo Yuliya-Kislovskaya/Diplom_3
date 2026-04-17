@@ -5,7 +5,6 @@ import sys
 import os
 from helpers import generate_user_data
 from url import URL, CREATE_USER, DELETE_USER
-from selenium.webdriver.chrome.service import Service
 from pages.constructor_page import ConstructorPage
 from pages.order_feed_page import OrderFeedPage
 from pages.authorizations_page import AuthorizationsPage
@@ -24,11 +23,9 @@ def browser(request):
         driver = webdriver.Chrome(options=chrome_options)
     elif request.param == "firefox":
         firefox_options = webdriver.FirefoxOptions()
-        # Добавляем аргументы для Firefox
         firefox_options.add_argument("--width=1920")
         firefox_options.add_argument("--height=1080")
         driver = webdriver.Firefox(options=firefox_options)
-        # Принудительно устанавливаем размер окна для стабильности
         driver.set_window_size(1920, 1080)
     else:
         raise TypeError("Driver is not found")
@@ -40,39 +37,42 @@ def browser(request):
 @pytest.fixture(scope="function")
 def create_and_delete_user():
     """
-    Фикстура для создания и удаления пользователя с защитой от ошибок API.
+    Фикстура для создания и удаления пользователя.
+    Здесь yield необходим, так как после теста выполняется удаление.
     """
     payload = generate_user_data()
     response = requests.post(URL + CREATE_USER, json=payload)
     
-    # Проверка, что юзер создался успешно
     if response.status_code != 200:
         pytest.fail(f"Ошибка при создании пользователя: {response.text}")
     
     response_data = response.json()
     yield response, payload
     
-    # Удаление по accessToken, если он пришел
     token = response_data.get('accessToken')
     if token:
         requests.delete(URL + DELETE_USER, headers={'Authorization': token})
 
 @pytest.fixture
 def prepare_for_constructor(browser, create_and_delete_user):
+    """Подготовка страниц для тестов конструктора"""
     response, payload = create_and_delete_user
-    yield response, payload['email'], payload['password'], AuthorizationsPage(browser), ConstructorPage(browser), OrderFeedPage(browser)
+    return response, payload['email'], payload['password'], AuthorizationsPage(browser), ConstructorPage(browser), OrderFeedPage(browser)
 
 @pytest.fixture()
 def prepare_for_order(browser, create_and_delete_user):
+    """Подготовка страниц для тестов ленты заказов"""
     response, payload = create_and_delete_user
-    yield response, payload['email'], payload['password'], AuthorizationsPage(browser), OrderFeedPage(browser), PersonalAccountPage(browser), ConstructorPage(browser)
+    return response, payload['email'], payload['password'], AuthorizationsPage(browser), OrderFeedPage(browser), PersonalAccountPage(browser), ConstructorPage(browser)
 
 @pytest.fixture()
 def prepare_for_recovery_password(browser):
-    yield PasswordRecoveryPage(browser)
+    """Подготовка страницы восстановления пароля"""
+    return PasswordRecoveryPage(browser)
 
 @pytest.fixture()
 def prepare_for_personal_account(browser, create_and_delete_user):
+    """Подготовка страниц для личного кабинета"""
     response, payload = create_and_delete_user
-    yield response, payload['email'], payload['password'], PersonalAccountPage(browser), AuthorizationsPage(browser)
+    return response, payload['email'], payload['password'], PersonalAccountPage(browser), AuthorizationsPage(browser)
 

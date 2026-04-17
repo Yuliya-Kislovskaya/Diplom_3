@@ -29,11 +29,11 @@ class PasswordRecoveryPage(BasePage):
 
     @allure.step('Проверяет активность поля пароля (наличие активного класса)')
     def is_password_field_active(self):
-        # Ждем появления элемента с локатором PASSWORD_FIELD_ACTIVE 
-        # (который содержит класс инпута в активном состоянии)
-        return self.explicit_wait.until(
-            lambda d: d.find_element(*PASSWORD_FIELD_ACTIVE).is_displayed()
-        )
+        def condition(_):
+            return self.find(PASSWORD_FIELD_ACTIVE).is_displayed()
+            
+        return self.explicit_wait.until(condition)
+
 
 
 

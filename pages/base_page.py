@@ -77,10 +77,29 @@ class BasePage:
         target = self.find(target_locator)
         self.actions.click_and_hold(source).pause(0.5).move_to_element(target).release().perform()
 
-    # --- Новые методы для стабильности в Firefox ---
+    @allure.step('Ожидание появления номера заказа')
+    def wait_for_order_number(self, locator):
+        """Ждет, пока текст элемента станет валидным числом и не будет равен 9999"""
+        def condition(_):
+            text = self.get_text_of_element(locator).strip()
+            return text if text.isdigit() and text not in ["9999", "0", ""] else False
+        return self.explicit_wait.until(condition)
 
+    @allure.step('Ожидание, пока элемент перестанет быть перекрыт другими объектами')
+    def wait_until_element_not_obscured(self, locator):
+        """Ждет, пока центр элемента станет доступен для взаимодействия (не перекрыт модалкой или оверлеем)"""
+        def condition(_):
+            try:
+                # Используем поиск через свой же метод класса
+                element = self.browser.find_element(*locator)
+                return element if self._is_element_not_obscured(element) else False
+            except Exception:
+                return False
+        return self.explicit_wait.until(condition)
+
+    @allure.step('Проверка через JS, что элемент не перекрыт другими слоями')
     def _is_element_not_obscured(self, element):
-        """Проверяет через JS, что элемент является верхним в данной точке (не перекрыт)"""
+        """Вспомогательный метод для проверки 'видимости' точки элемента для клика"""
         return self.browser.execute_script(
             """
             const elem = arguments[0];
@@ -95,14 +114,6 @@ class BasePage:
             element,
         )
 
-    @allure.step('Ожидание, пока элемент перестанет быть перекрыт другими объектами')
-    def wait_until_element_not_obscured(self, locator):
-        """Ждет, пока центр элемента станет доступен для взаимодействия"""
-        def condition(driver):
-            element = driver.find_element(*locator)
-            return element if self._is_element_not_obscured(element) else False
-        
-        return self.explicit_wait.until(condition)
 
 
 
